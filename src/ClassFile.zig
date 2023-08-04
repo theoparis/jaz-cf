@@ -140,7 +140,7 @@ pub fn encode(self: *const ClassFile, writer: anytype) !void {
 
     try writer.writeIntBig(u16, self.minor_version);
     try writer.writeIntBig(u16, self.major_version);
-    try writer.writeIntBig(u16, @intCast(u16, self.constant_pool.entries.items.len) + 1);
+    try writer.writeIntBig(u16, @as(u16, @intCast(self.constant_pool.entries.items.len)) + 1);
 
     var constant_pool_index: usize = 0;
     while (constant_pool_index < self.constant_pool.entries.items.len) : (constant_pool_index += 1) {
@@ -167,16 +167,16 @@ pub fn encode(self: *const ClassFile, writer: anytype) !void {
     try writer.writeIntBig(u16, self.this_class);
     try writer.writeIntBig(u16, self.super_class orelse 0);
 
-    try writer.writeIntBig(u16, @intCast(u16, self.interfaces.items.len));
+    try writer.writeIntBig(u16, @as(u16, @intCast(self.interfaces.items.len)));
     for (self.interfaces.items) |i| try writer.writeIntBig(u16, i);
 
-    try writer.writeIntBig(u16, @intCast(u16, self.fields.items.len));
+    try writer.writeIntBig(u16, @as(u16, @intCast(self.fields.items.len)));
     for (self.fields.items) |f| try f.encode(writer);
 
-    try writer.writeIntBig(u16, @intCast(u16, self.methods.items.len));
+    try writer.writeIntBig(u16, @as(u16, @intCast(self.methods.items.len)));
     for (self.methods.items) |m| try m.encode(writer);
 
-    try writer.writeIntBig(u16, @intCast(u16, self.attributes.items.len));
+    try writer.writeIntBig(u16, @as(u16, @intCast(self.attributes.items.len)));
     for (self.attributes.items) |a| try a.encode(writer);
 }
 

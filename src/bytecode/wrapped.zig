@@ -127,7 +127,7 @@ pub const PushConstantOperation = union(enum) {
 
     fn matches(comptime opcode: ops.Opcode, comptime operation_field: std.builtin.Type.UnionField) bool {
         _ = operation_field;
-        return @enumToInt(opcode) >= 0x01 and @enumToInt(opcode) <= 0x11;
+        return @intFromEnum(opcode) >= 0x01 and @intFromEnum(opcode) <= 0x11;
     }
 
     fn wrap(op: ops.Operation, comptime opcode: ops.Opcode, comptime operation_field: std.builtin.Type.UnionField) PushConstantOperation {
@@ -301,7 +301,7 @@ pub const NumericalOperation = struct {
 
     fn matches(comptime opcode: ops.Opcode, comptime operation_field: std.builtin.Type.UnionField) bool {
         _ = operation_field;
-        return @enumToInt(opcode) >= 0x60 and @enumToInt(opcode) <= 0x77;
+        return @intFromEnum(opcode) >= 0x60 and @intFromEnum(opcode) <= 0x77;
     }
 
     fn wrap(op: ops.Operation, comptime opcode: ops.Opcode, comptime operation_field: std.builtin.Type.UnionField) NumericalOperation {
@@ -347,7 +347,7 @@ pub const ConvertOperation = struct {
 
     fn matches(comptime opcode: ops.Opcode, comptime operation_field: std.builtin.Type.UnionField) bool {
         _ = operation_field;
-        return @enumToInt(opcode) >= 0x85 and @enumToInt(opcode) <= 0x93;
+        return @intFromEnum(opcode) >= 0x85 and @intFromEnum(opcode) <= 0x93;
     }
 
     fn wrap(op: ops.Operation, comptime opcode: ops.Opcode, comptime operation_field: std.builtin.Type.UnionField) ConvertOperation {
@@ -379,7 +379,7 @@ pub const ReturnOperation = struct {
 
     fn matches(comptime opcode: ops.Opcode, comptime operation_field: std.builtin.Type.UnionField) bool {
         _ = operation_field;
-        return @enumToInt(opcode) >= 0xac and @enumToInt(opcode) <= 0xb1;
+        return @intFromEnum(opcode) >= 0xac and @intFromEnum(opcode) <= 0xb1;
     }
 
     fn wrap(op: ops.Operation, comptime opcode: ops.Opcode, comptime operation_field: std.builtin.Type.UnionField) ReturnOperation {

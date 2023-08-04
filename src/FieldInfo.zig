@@ -89,7 +89,7 @@ pub fn encode(self: FieldInfo, writer: anytype) !void {
     try writer.writeIntBig(u16, self.name_index);
     try writer.writeIntBig(u16, self.descriptor_index);
 
-    try writer.writeIntBig(u16, @intCast(u16, self.attributes.items.len));
+    try writer.writeIntBig(u16, @as(u16, @intCast(self.attributes.items.len)));
     for (self.attributes.items) |*att| try att.encode(writer);
 }
 

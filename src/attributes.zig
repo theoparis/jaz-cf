@@ -157,9 +157,9 @@ pub const CodeAttribute = struct {
     }
 
     pub fn calcAttrLen(self: CodeAttribute) u32 {
-        var len: u32 = 2 + 2 + 4 + @intCast(u32, self.code.items.len) + 2 + 2;
+        var len: u32 = 2 + 2 + 4 + @as(u32, @intCast(self.code.items.len)) + 2 + 2;
         for (self.attributes.items) |att| len += att.calcAttrLen();
-        len += 8 * @intCast(u32, self.exception_table.items.len);
+        len += 8 * @as(u32, @intCast(self.exception_table.items.len));
         return len;
     }
 
@@ -167,13 +167,13 @@ pub const CodeAttribute = struct {
         try writer.writeIntBig(u16, self.max_stack);
         try writer.writeIntBig(u16, self.max_locals);
 
-        try writer.writeIntBig(u32, @intCast(u32, self.code.items.len));
+        try writer.writeIntBig(u32, @as(u32, @intCast(self.code.items.len)));
         try writer.writeAll(self.code.items);
 
-        try writer.writeIntBig(u16, @intCast(u16, self.exception_table.items.len));
+        try writer.writeIntBig(u16, @as(u16, @intCast(self.exception_table.items.len)));
         for (self.exception_table.items) |et| try et.encode(writer);
 
-        try writer.writeIntBig(u16, @intCast(u16, self.attributes.items.len));
+        try writer.writeIntBig(u16, @as(u16, @intCast(self.attributes.items.len)));
         for (self.attributes.items) |at| try at.encode(writer);
     }
 
@@ -230,12 +230,12 @@ pub const LineNumberTableAttribute = struct {
     }
 
     pub fn calcAttrLen(self: LineNumberTableAttribute) u32 {
-        var len: u32 = 2 + 4 * @intCast(u32, self.line_number_table.items.len);
+        var len: u32 = 2 + 4 * @as(u32, @intCast(self.line_number_table.items.len));
         return len;
     }
 
     pub fn encode(self: LineNumberTableAttribute, writer: anytype) anyerror!void {
-        try writer.writeIntBig(u16, @intCast(u16, self.line_number_table.items.len));
+        try writer.writeIntBig(u16, @as(u16, @intCast(self.line_number_table.items.len)));
         for (self.line_number_table.items) |entry| try entry.encode(writer);
     }
 
@@ -299,12 +299,12 @@ pub const ExceptionsAttribute = struct {
     }
 
     pub fn calcAttrLen(self: ExceptionsAttribute) u32 {
-        var len: u32 = 2 + 2 * @intCast(u32, self.exception_index_table.items.len);
+        var len: u32 = 2 + 2 * @as(u32, @intCast(self.exception_index_table.items.len));
         return len;
     }
 
     pub fn encode(self: ExceptionsAttribute, writer: anytype) anyerror!void {
-        try writer.writeIntBig(u16, @intCast(u16, self.exception_index_table.items.len));
+        try writer.writeIntBig(u16, @as(u16, @intCast(self.exception_index_table.items.len)));
         for (self.exception_index_table.items) |entry| try writer.writeIntBig(u16, entry);
     }
 
@@ -452,7 +452,7 @@ pub const ElementValue = union(ElementTag) {
     }
 
     pub fn encode(self: ElementValue, writer: anytype) anyerror!void {
-        try writer.writeIntBig(u16, @enumToInt(self));
+        try writer.writeIntBig(u16, @intFromEnum(self));
         switch (self) {
             .EnumConstant => |econst| {
                 try writer.writeIntBig(u16, econst.type_name_index);

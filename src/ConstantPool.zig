@@ -43,7 +43,7 @@ pub fn Serialize(comptime T: type) type {
             inline for (std.meta.fields(T)[1..]) |field| {
                 @field(value, field.name) = switch (@typeInfo(field.type)) {
                     .Int => try reader.readIntBig(field.type),
-                    .Enum => |info| @intToEnum(field.type, try reader.readIntBig(info.tag_type)),
+                    .Enum => |info| @as(field.type, @enumFromInt(try reader.readIntBig(info.tag_type))),
                     else => @compileError("Decode not implemented: " ++ @typeName(field.type)),
                 };
             }
@@ -61,7 +61,7 @@ pub fn locateUtf8Entry(self: *ConstantPool, bytes: []const u8) !u16 {
         return get_or_put_output.value_ptr.*;
     } else {
         var entry = try self.entries.addOne(self.allocator);
-        get_or_put_output.value_ptr.* = @intCast(u16, self.entries.items.len);
+        get_or_put_output.value_ptr.* = @as(u16, @intCast(self.entries.items.len));
         entry.* = Entry{ .utf8 = .{ .constant_pool = self, .bytes = try self.allocator.dupe(u8, bytes) } };
         return get_or_put_output.value_ptr.*;
     }
@@ -88,9 +88,9 @@ pub fn decodeEntries(self: *ConstantPool, reader: anytype) !void {
 
 pub fn decodeEntry(self: *ConstantPool, reader: anytype) !Entry {
     var tag = try reader.readIntBig(u8);
-    inline for (@typeInfo(Tag).Enum.fields) |f, i| {
+    inline for (@typeInfo(Tag).Enum.fields, 0..) |f, i| {
         const this_tag_value = @field(Tag, f.name);
-        if (tag == @enumToInt(this_tag_value)) {
+        if (tag == @intFromEnum(this_tag_value)) {
             const T = std.meta.fields(Entry)[i].type;
             var value = if (@hasDecl(T, "decode")) try @field(T, "decode")(self, reader) else try Serialize(T).decode(self, reader);
             return @unionInit(Entry, f.name, value);
@@ -219,7 +219,7 @@ pub const Utf8Info = struct {
     }
 
     pub fn encode(self: Utf8Info, writer: anytype) !void {
-        try writer.writeIntBig(u16, @intCast(u16, self.bytes.len));
+        try writer.writeIntBig(u16, @as(u16, @intCast(self.bytes.len)));
         try writer.writeAll(self.bytes);
     }
 
@@ -359,10 +359,10 @@ pub const Entry = union(Tag) {
     package: PackageInfo,
 
     pub fn encode(self: Entry, writer: anytype) !void {
-        inline for (@typeInfo(Tag).Enum.fields) |f, i| {
+        inline for (@typeInfo(Tag).Enum.fields, 0..) |f, i| {
             const this_tag_value = @field(Tag, f.name);
-            if (@enumToInt(self) == @enumToInt(this_tag_value)) {
-                try writer.writeByte(@enumToInt(self));
+            if (@intFromEnum(self) == @intFromEnum(this_tag_value)) {
+                try writer.writeByte(@intFromEnum(self));
 
                 const T = std.meta.fields(Entry)[i].type;
                 var value = @field(self, f.name);
@@ -373,7 +373,7 @@ pub const Entry = union(Tag) {
                 inline for (std.meta.fields(T)[1..]) |field| {
                     switch (@typeInfo(field.type)) {
                         .Int => try writer.writeIntBig(field.type, @field(value, field.name)),
-                        .Enum => |info| try writer.writeIntBig(info.tag_type, @enumToInt(@field(value, field.name))),
+                        .Enum => |info| try writer.writeIntBig(info.tag_type, @intFromEnum(@field(value, field.name))),
                         else => @compileError("Encode not implemented: " ++ @typeName(field.type)),
                     }
                 }
